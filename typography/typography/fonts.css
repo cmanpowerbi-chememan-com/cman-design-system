@@ -1,0 +1,95 @@
+/* =========================================================================
+   FC Minimal — Chememan Primary Typeface (TH + EN)
+   18 styles (9 weights × 2 italics).
+   Fonts ship in ../assets/fonts/ — adjust the relative path if you move this file.
+
+   Usage: <link rel="stylesheet" href="design-system/chememan/typography/fonts.css">
+          body { font-family: 'FC Minimal', sans-serif; }
+   ========================================================================= */
+
+/* Thin 100 */
+@font-face { font-family: 'FC Minimal'; font-style: normal; font-weight: 100; font-display: swap;
+  src: url('../assets/fonts/FC Minimal Thin ver 1.10.otf') format('opentype'),
+       url('../assets/fonts/FC Minimal Thin ver 1.10.ttf') format('truetype'); }
+@font-face { font-family: 'FC Minimal'; font-style: italic; font-weight: 100; font-display: swap;
+  src: url('../assets/fonts/FC Minimal Thin Italic ver 1.10.otf') format('opentype'),
+       url('../assets/fonts/FC Minimal Thin Italic ver 1.10.ttf') format('truetype'); }
+
+/* ExtraLight 200 */
+@font-face { font-family: 'FC Minimal'; font-style: normal; font-weight: 200; font-display: swap;
+  src: url('../assets/fonts/FC Minimal ExtraLight ver 1.10.otf') format('opentype'),
+       url('../assets/fonts/FC Minimal ExtraLight ver 1.10.ttf') format('truetype'); }
+@font-face { font-family: 'FC Minimal'; font-style: italic; font-weight: 200; font-display: swap;
+  src: url('../assets/fonts/FC Minimal ExtraLight Italic ver 1.10.otf') format('opentype'),
+       url('../assets/fonts/FC Minimal ExtraLight Italic ver 1.10.ttf') format('truetype'); }
+
+/* Light 300 */
+@font-face { font-family: 'FC Minimal'; font-style: normal; font-weight: 300; font-display: swap;
+  src: url('../assets/fonts/FC Minimal Light ver 1.10.otf') format('opentype'),
+       url('../assets/fonts/FC Minimal Light ver 1.10.ttf') format('truetype'); }
+@font-face { font-family: 'FC Minimal'; font-style: italic; font-weight: 300; font-display: swap;
+  src: url('../assets/fonts/FC Minimal Light Italic ver 1.10.otf') format('opentype'),
+       url('../assets/fonts/FC Minimal Light Italic ver 1.10.ttf') format('truetype'); }
+
+/* Regular 400 */
+@font-face { font-family: 'FC Minimal'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('../assets/fonts/FC Minimal Regular ver 1.10.otf') format('opentype'),
+       url('../assets/fonts/FC Minimal Regular ver 1.10.ttf') format('truetype'); }
+@font-face { font-family: 'FC Minimal'; font-style: italic; font-weight: 400; font-display: swap;
+  src: url('../assets/fonts/FC Minimal Italic ver 1.10.otf') format('opentype'),
+       url('../assets/fonts/FC Minimal Italic ver 1.10.ttf') format('truetype'); }
+
+/* Medium 500 */
+@font-face { font-family: 'FC Minimal'; font-style: normal; font-weight: 500; font-display: swap;
+  src: url('../assets/fonts/FC Minimal Medium ver 1.10.otf') format('opentype'),
+       url('../assets/fonts/FC Minimal Medium ver 1.10.ttf') format('truetype'); }
+@font-face { font-family: 'FC Minimal'; font-style: italic; font-weight: 500; font-display: swap;
+  src: url('../assets/fonts/FC Minimal Medium Italic ver 1.10.otf') format('opentype'),
+       url('../assets/fonts/FC Minimal Medium Italic ver 1.10.ttf') format('truetype'); }
+
+/* SemiBold 600 */
+@font-face { font-family: 'FC Minimal'; font-style: normal; font-weight: 600; font-display: swap;
+  src: url('../assets/fonts/FC Minimal SemiBold ver 1.10.otf') format('opentype'),
+       url('../assets/fonts/FC Minimal SemiBold ver 1.10.ttf') format('truetype'); }
+@font-face { font-family: 'FC Minimal'; font-style: italic; font-weight: 600; font-display: swap;
+  src: url('../assets/fonts/FC Minimal SemiBold Italic ver 1.10.otf') format('opentype'),
+       url('../assets/fonts/FC Minimal SemiBold Italic ver 1.10.ttf') format('truetype'); }
+
+/* Bold 700 */
+@font-face { font-family: 'FC Minimal'; font-style: normal; font-weight: 700; font-display: swap;
+  src: url('../assets/fonts/FC Minimal Bold ver 1.10.otf') format('opentype'),
+       url('../assets/fonts/FC Minimal Bold ver 1.10.ttf') format('truetype'); }
+@font-face { font-family: 'FC Minimal'; font-style: italic; font-weight: 700; font-display: swap;
+  src: url('../assets/fonts/FC Minimal Bold Italic ver 1.10.otf') format('opentype'),
+       url('../assets/fonts/FC Minimal Bold Italic ver 1.10.ttf') format('truetype'); }
+
+/* ExtraBold 800 */
+@font-face { font-family: 'FC Minimal'; font-style: normal; font-weight: 800; font-display: swap;
+  src: url('../assets/fonts/FC Minimal ExtraBold ver 1.10.otf') format('opentype'),
+       url('../assets/fonts/FC Minimal ExtraBold ver 1.10.ttf') format('truetype'); }
+@font-face { font-family: 'FC Minimal'; font-style: italic; font-weight: 800; font-display: swap;
+  src: url('../assets/fonts/FC Minimal ExtraBold Italic ver 1.10.otf') format('opentype'),
+       url('../assets/fonts/FC Minimal ExtraBold Italic ver 1.10.ttf') format('truetype'); }
+
+/* Black 900 */
+@font-face { font-family: 'FC Minimal'; font-style: normal; font-weight: 900; font-display: swap;
+  src: url('../assets/fonts/FC Minimal Black ver 1.10.otf') format('opentype'),
+       url('../assets/fonts/FC Minimal Black ver 1.10.ttf') format('truetype'); }
+@font-face { font-family: 'FC Minimal'; font-style: italic; font-weight: 900; font-display: swap;
+  src: url('../assets/fonts/FC Minimal Black Italic ver 1.10.otf') format('opentype'),
+       url('../assets/fonts/FC Minimal Black Italic ver 1.10.ttf') format('truetype'); }
+
+/* =========================================================================
+   TYPE SCALE PRESETS
+   The 9-step ramp pairs with the radius/elevation scale to create predictable
+   hierarchy in landing pages, slide decks, and dashboards.
+   ========================================================================= */
+.cman-display { font-family:'FC Minimal',sans-serif; font-weight:900; font-size:clamp(3.5rem,8vw,8rem); line-height:1.05; letter-spacing:-0.04em; }
+.cman-h1      { font-family:'FC Minimal',sans-serif; font-weight:800; font-size:clamp(2.5rem,5vw,4.5rem); line-height:1.05; letter-spacing:-0.03em; }
+.cman-h2      { font-family:'FC Minimal',sans-serif; font-weight:700; font-size:clamp(2rem,4vw,3rem);    line-height:1.1;  letter-spacing:-0.02em; }
+.cman-h3      { font-family:'FC Minimal',sans-serif; font-weight:600; font-size:clamp(1.5rem,2.5vw,2rem);line-height:1.2;  letter-spacing:-0.01em; }
+.cman-h4      { font-family:'FC Minimal',sans-serif; font-weight:600; font-size:1.25rem; line-height:1.3; }
+.cman-lead    { font-family:'FC Minimal',sans-serif; font-weight:400; font-size:clamp(1.125rem,1.5vw,1.5rem); line-height:1.5; }
+.cman-body    { font-family:'FC Minimal',sans-serif; font-weight:400; font-size:1rem; line-height:1.6; }
+.cman-caption { font-family:'FC Minimal',sans-serif; font-weight:500; font-size:0.875rem; line-height:1.4; letter-spacing:0.02em; }
+.cman-eyebrow { font-family:'FC Minimal',sans-serif; font-weight:600; font-size:0.75rem; line-height:1; letter-spacing:0.16em; text-transform:uppercase; }

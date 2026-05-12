@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Chememan — Modern Design System Demo</title>
+
+  <!-- Local design system -->
+  <link rel="stylesheet" href="../typography/fonts.css"/>
+  <link rel="stylesheet" href="../tokens/tokens.css"/>
+
+  <style>
+    /* Minimal page reset, system tokens do the heavy lifting */
+    *,*::before,*::after { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; font-family: var(--cman-font); color: var(--cman-fg); background: var(--cman-bg); }
+    a { color: inherit; text-decoration: none; }
+
+    /* ============================================== */
+    /*  HERO                                          */
+    /* ============================================== */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 100vh;
+      background: var(--cman-grad-hero-mesh);
+      color: #fff;
+      padding: 120px 24px 96px;
+    }
+    .hero__inner { max-width: 1280px; margin: 0 auto; position: relative; z-index: 2; }
+    .hero__eyebrow {
+      font-weight: 600; font-size: .75rem; letter-spacing: var(--cman-tr-widest);
+      text-transform: uppercase; color: var(--cman-sky);
+    }
+    .hero__title {
+      margin: 1.5rem 0 0; max-width: 22ch;
+      font-weight: 900; font-size: clamp(3rem, 7vw, 6.5rem); line-height: 1.05;
+      letter-spacing: var(--cman-tr-tighter);
+      background: var(--cman-grad-headline);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .hero__lead {
+      margin: 2rem 0 0; max-width: 36rem;
+      font-size: clamp(1.125rem, 1.4vw, 1.4rem); line-height: 1.5; color: rgba(255,255,255,.85);
+    }
+    .hero__cta-row { margin-top: 2.5rem; display: flex; flex-wrap: wrap; gap: 1rem; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-family: var(--cman-font); font-weight: 600;
+      padding: 14px 28px; border-radius: var(--cman-r-lg); border: 0;
+      cursor: pointer; transition: all var(--cman-d-base) var(--cman-e-spring);
+    }
+    .btn--primary {
+      background: var(--cman-sky); color: var(--cman-blue-900);
+      box-shadow: var(--cman-sh-glow-blue);
+    }
+    .btn--primary:hover { transform: translateY(-2px) scale(1.02); background: #fff; }
+
+    /* New bright-frost ghost button matches the updated glassmorphism recipe */
+    .btn--ghost {
+      background: rgba(255,255,255,.18); color: #fff;
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255,255,255,.35);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.45);
+    }
+    .btn--ghost:hover { background: rgba(255,255,255,.28); }
+
+    /* ============================================== */
+    /*  STAT ROW (bento) — bright-frost glass         */
+    /* ============================================== */
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-top: 80px; }
+    .stat {
+      /* New default glassmorphism: ~18% white + bright top inset highlight */
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.35);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-radius: var(--cman-r-xl);
+      padding: 24px;
+      box-shadow:
+        0 8px 32px -4px rgba(0,16,8,.18),
+        inset 0 1px 0 rgba(255,255,255,.45),
+        inset 0 -1px 0 rgba(255,255,255,.10);
+    }
+    .stat__num {
+      font-weight: 800; font-size: clamp(2rem, 4vw, 3rem); line-height: 1;
+      letter-spacing: var(--cman-tr-tighter);
+    }
+    /* Tri-color rotation: green → blue → brown → blue glow */
+    .stat:nth-child(1) .stat__num { color: var(--cman-mint); }
+    .stat:nth-child(2) .stat__num { color: var(--cman-sky); }
+    .stat:nth-child(3) .stat__num { color: #E1B86B; } /* warm amber tint */
+    .stat:nth-child(4) .stat__num { color: var(--cman-mint); }
+
+    .stat__label { margin-top: 8px; font-size: .8rem; color: rgba(255,255,255,.75);
+                   text-transform: uppercase; letter-spacing: var(--cman-tr-wider); }
+
+    /* ============================================== */
+    /*  NAV (bright-frost glass)                      */
+    /* ============================================== */
+    .nav {
+      position: fixed; inset: 16px 16px auto 16px; z-index: 30;
+      max-width: 1280px; margin-inline: auto;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 24px;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.35);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-radius: var(--cman-r-2xl);
+      box-shadow:
+        0 8px 32px -4px rgba(0,16,8,.20),
+        inset 0 1px 0 rgba(255,255,255,.45);
+    }
+    .nav__logo { height: 36px; width: auto; filter: drop-shadow(0 2px 8px rgba(0,0,0,.3)); }
+    .nav ul { display: flex; gap: 32px; margin: 0; padding: 0; list-style: none; font-size: .875rem; color: rgba(255,255,255,.85); }
+    .nav ul a:hover { color: #fff; }
+
+    /* ============================================== */
+    /*  CHARACTER FLOAT                               */
+    /* ============================================== */
+    .character {
+      position: absolute; right: -32px; top: 96px; width: 280px; opacity: .92;
+      pointer-events: none; user-select: none;
+      filter: drop-shadow(0 24px 48px rgba(0,0,0,.45));
+      animation: bob 6s ease-in-out infinite;
+    }
+    @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+    @media (max-width: 768px) { .character { display: none; } .nav ul { display: none; } }
+
+    /* ============================================== */
+    /*  CONTENT BAND — tri-color (green/blue/brown)   */
+    /* ============================================== */
+    .band {
+      padding: 96px 24px; color: #fff;
+      /* Layered tri-color background — green left, blue mid, brown right */
+      background:
+        radial-gradient(at 15% 30%, rgba(0,82,44,.55) 0%, transparent 55%),
+        radial-gradient(at 85% 50%, rgba(60,96,165,.55) 0%, transparent 55%),
+        radial-gradient(at 50% 90%, rgba(116,80,33,.45) 0%, transparent 55%),
+        #050E1A;
+    }
+    .band__inner { max-width: 1280px; margin: 0 auto; display: grid; gap: 16px;
+                   grid-template-columns: repeat(12, 1fr); grid-auto-rows: minmax(180px, auto); }
+
+    .tile {
+      padding: 32px; border-radius: var(--cman-r-xl);
+      display: flex; flex-direction: column; justify-content: space-between;
+      position: relative; overflow: hidden;
+      /* Default: bright-frost glass on every tile */
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.35);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      box-shadow:
+        0 12px 36px -6px rgba(0,16,8,.22),
+        inset 0 1px 0 rgba(255,255,255,.45),
+        inset 0 -1px 0 rgba(255,255,255,.10);
+    }
+    /* Per-tile color hint via gradient overlay — keeps the frost bright */
+    .tile.t1 {
+      grid-column: span 6; grid-row: span 2;
+      background:
+        linear-gradient(135deg, rgba(0,82,44,.18), rgba(255,255,255,.20)),
+        rgba(255,255,255,.10);
+    }
+    .tile.t2 {
+      grid-column: span 3;
+      background:
+        linear-gradient(135deg, rgba(60,96,165,.22), rgba(255,255,255,.20)),
+        rgba(255,255,255,.10);
+    }
+    .tile.t3 {
+      grid-column: span 3;
+      background:
+        linear-gradient(135deg, rgba(116,80,33,.20), rgba(255,255,255,.20)),
+        rgba(255,255,255,.10);
+    }
+    .tile.t4 {
+      grid-column: span 6;
+      /* Tri-color sweep tile */
+      background:
+        linear-gradient(135deg, rgba(0,82,44,.22) 0%, rgba(60,96,165,.22) 50%, rgba(116,80,33,.22) 100%),
+        rgba(255,255,255,.16);
+    }
+
+    .tile h3 { margin: 0; font-weight: 800; font-size: clamp(1.5rem, 2.5vw, 2.25rem); line-height: 1.1; letter-spacing: -.02em; color: #fff; }
+    .tile p  { margin: 16px 0 0; color: rgba(255,255,255,.85); line-height: 1.5; }
+    .tile__eyebrow { font-size: .7rem; font-weight: 600; letter-spacing: var(--cman-tr-widest); text-transform: uppercase; }
+    .tile.t1 .tile__eyebrow { color: var(--cman-mint); }
+    .tile.t2 .tile__eyebrow { color: var(--cman-sky); }
+    .tile.t3 .tile__eyebrow { color: #E1B86B; }
+    .tile.t4 .tile__eyebrow { color: var(--cman-sky); }
+
+    .tile__num {
+      font-weight: 900; font-size: clamp(3rem, 6vw, 5rem); line-height: 1;
+      letter-spacing: -.04em;
+    }
+
+    @media (max-width: 768px) { .tile.t1, .tile.t2, .tile.t3, .tile.t4 { grid-column: span 12; grid-row: auto; } }
+
+    /* ============================================== */
+    /*  STORY PANEL — large glass over a colored bg   */
+    /*  (Pattern: wrap any text-heavy section in a    */
+    /*  big bright-frost panel so text reads cleanly) */
+    /* ============================================== */
+    .story-bg {
+      padding: 120px 24px;
+      background:
+        radial-gradient(at 30% 20%, rgba(0,82,44,.50) 0%, transparent 55%),
+        radial-gradient(at 75% 80%, rgba(60,96,165,.55) 0%, transparent 55%),
+        radial-gradient(at 50% 50%, rgba(116,80,33,.30) 0%, transparent 60%),
+        #050E1A;
+    }
+    .story-panel {
+      max-width: 1080px; margin: 0 auto;
+      padding: clamp(40px, 6vw, 80px);
+      border-radius: var(--cman-r-3xl);
+      /* Bright-frost glass — text reads cleanly */
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.35);
+      backdrop-filter: blur(32px) saturate(180%);
+      -webkit-backdrop-filter: blur(32px) saturate(180%);
+      box-shadow:
+        0 24px 80px -12px rgba(0,16,8,.30),
+        inset 0 1px 0 rgba(255,255,255,.50),
+        inset 0 -1px 0 rgba(255,255,255,.10);
+      color: #fff;
+    }
+    .story-panel__eyebrow {
+      font-weight: 600; font-size: .75rem; letter-spacing: var(--cman-tr-widest);
+      text-transform: uppercase; color: var(--cman-sky);
+    }
+    .story-panel h2 {
+      margin: 1rem 0 0; font-weight: 800;
+      font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.1;
+      letter-spacing: -.02em;
+    }
+    .story-panel__body { display: grid; gap: 48px; margin-top: 40px; grid-template-columns: 1fr; }
+    @media (min-width: 800px) { .story-panel__body { grid-template-columns: 1fr 1.4fr; } }
+    .story-panel__lead {
+      font-size: clamp(1.125rem, 1.5vw, 1.4rem); line-height: 1.5;
+      color: rgba(255,255,255,.92);
+      border-left: 2px solid rgba(94,205,246,.5); padding-left: 24px;
+    }
+    .story-panel__copy { font-size: 1.05rem; line-height: 1.7; color: rgba(255,255,255,.85); }
+    .story-panel__copy p + p { margin-top: 1.25em; }
+
+    /* ============================================== */
+    /*  CLEAN EDITORIAL — Levels/Yucca aesthetic      */
+    /*  Off-white background, big FC Minimal type,    */
+    /*  generous whitespace, subtle CMAN accents.     */
+    /* ============================================== */
+    .editorial {
+      background: #F7F5F0;   /* warm off-white — softer than pure #fff */
+      color: #001008;
+      padding: clamp(96px, 14vh, 200px) 24px;
+      position: relative;
+    }
+    .editorial__inner { max-width: 1280px; margin: 0 auto; position: relative; }
+    .editorial__num {
+      position: absolute; top: -12px; right: 0;
+      font-size: .75rem; font-weight: 500; letter-spacing: var(--cman-tr-widest);
+      text-transform: uppercase; color: rgba(0,16,8,.40);
+    }
+    .editorial__rule {
+      height: 1px; width: 100%; background: rgba(0,16,8,.12); margin-bottom: 64px;
+    }
+    .editorial__eyebrow {
+      display: inline-flex; align-items: center; gap: 12px;
+      font-weight: 600; font-size: .75rem; letter-spacing: var(--cman-tr-widest);
+      text-transform: uppercase; color: var(--cman-forest);
+    }
+    .editorial__eyebrow::before {
+      content: ''; width: 10px; height: 10px; background: var(--cman-forest);
+      border-radius: 2px;
+    }
+    .editorial__layout {
+      display: grid; grid-template-columns: 1fr; gap: 64px;
+      margin-top: 32px; align-items: start;
+    }
+    @media (min-width: 900px) { .editorial__layout { grid-template-columns: 1.2fr 1fr; gap: 96px; } }
+
+    .editorial h2 {
+      margin: 0; font-weight: 900;
+      font-size: clamp(2.5rem, 6vw, 5.5rem); line-height: 1.02;
+      letter-spacing: -.04em;
+      color: #001008;
+    }
+    .editorial h2 em { font-style: normal; color: var(--cman-blue); }
+    .editorial__lead {
+      margin: 32px 0 0; font-size: clamp(1.125rem, 1.4vw, 1.4rem); line-height: 1.5;
+      color: #2C3833; max-width: 28rem;
+    }
+    .editorial__meta {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
+      padding-top: 24px; border-top: 1px solid rgba(0,16,8,.12);
+    }
+    .editorial__meta-label {
+      font-size: .7rem; font-weight: 600; letter-spacing: var(--cman-tr-widest);
+      text-transform: uppercase; color: rgba(0,16,8,.55);
+    }
+    .editorial__meta-value {
+      margin-top: 8px; font-weight: 800;
+      font-size: clamp(1.5rem, 2.5vw, 2.25rem); line-height: 1.1;
+      letter-spacing: -.02em;
+    }
+    .editorial__meta-value.is-forest { color: var(--cman-forest); }
+    .editorial__meta-value.is-blue   { color: var(--cman-blue); }
+
+    .editorial__big-stats {
+      display: grid; grid-template-columns: 1fr; gap: 48px;
+      padding-top: 16px;
+    }
+    @media (min-width: 600px) { .editorial__big-stats { grid-template-columns: 1fr 1fr; } }
+    .editorial__big-stat-num {
+      font-weight: 900; font-size: clamp(3rem, 6vw, 5rem); line-height: 1;
+      letter-spacing: -.04em;
+    }
+    .editorial__big-stat-num.is-forest { color: var(--cman-forest); }
+    .editorial__big-stat-num.is-amber  { color: var(--cman-amber); }
+    .editorial__big-stat-label {
+      margin-top: 12px; font-size: .9rem; line-height: 1.5;
+      color: rgba(0,16,8,.65);
+    }
+
+    /* ============================================== */
+    /*  FOOTER — deep navy with mint divider          */
+    /* ============================================== */
+    footer {
+      padding: 64px 24px 32px; color: rgba(255,255,255,.75); font-size: .875rem;
+      background:
+        linear-gradient(180deg, #0A0F1F 0%, #001008 100%);
+      border-top: 1px solid rgba(94,205,246,.18);
+    }
+    footer .row { max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
+    footer img { height: 40px; }
+    footer .stripe { color: var(--cman-sky); letter-spacing: .12em; }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <header class="nav">
+    <a href="#"><img class="nav__logo" src="../assets/logo/chememan-full-logo.png" alt="Chememan"/></a>
+    <ul>
+      <li><a href="#">Products</a></li>
+      <li><a href="#">Sustainability</a></li>
+      <li><a href="#">Investors</a></li>
+      <li><a href="#">Careers</a></li>
+    </ul>
+    <a href="#contact" class="btn btn--primary" style="padding:10px 18px; font-size:.875rem;">Contact us</a>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero__inner">
+      <p class="hero__eyebrow">Human Chemical for a Better Future</p>
+      <h1 class="hero__title">Industrial chemistry,<br/>built for what's next.</h1>
+      <p class="hero__lead">
+        Chememan is Thailand's leading lime producer — quietly powering steel, sugar,
+        water, and semiconductor industries across Asia.
+      </p>
+      <div class="hero__cta-row">
+        <a href="#" class="btn btn--primary">Explore products →</a>
+        <a href="#" class="btn btn--ghost">Investor relations</a>
+      </div>
+
+      <dl class="stats">
+        <div class="stat"><dd class="stat__num">35+</dd><dt class="stat__label">Years operating</dt></div>
+        <div class="stat"><dd class="stat__num">5</dd><dt class="stat__label">Plants</dt></div>
+        <div class="stat"><dd class="stat__num">1.2M</dd><dt class="stat__label">Tonnes / year</dt></div>
+        <div class="stat"><dd class="stat__num">12</dd><dt class="stat__label">Countries shipped</dt></div>
+      </dl>
+    </div>
+
+    <img class="character" src="../assets/characters/chememan-character.png" alt="" aria-hidden="true"/>
+  </section>
+
+  <!-- STORY PANEL — large bright-frost glass over a tri-color background.
+       Use this whenever a section is text-heavy: the glass separates the text
+       from the colored background and keeps it readable. -->
+  <section class="story-bg">
+    <div class="story-panel">
+      <p class="story-panel__eyebrow">The Chememan Story</p>
+      <h2>From a single kiln in Saraburi to Southeast Asia's most trusted lime supplier.</h2>
+      <div class="story-panel__body">
+        <p class="story-panel__lead">
+          We didn't set out to be the biggest. We set out to be the cleanest, the most reliable, and the most chemistry-honest lime producer in the region — and 35 years later, that focus is what every customer trades on.
+        </p>
+        <div class="story-panel__copy">
+          <p>
+            Founded in 1989 with a single rotary kiln, Chememan now operates five plants across Thailand, exporting to twelve countries and serving sectors as diverse as steel, water treatment, sugar refining, semiconductor manufacturing, and pulp & paper.
+          </p>
+          <p>
+            Our roadmap to 2030 is built on three commitments: net-negative carbon lime production, AI-monitored kiln operations at every site, and full traceability from limestone quarry to customer delivery — the same chemistry, but accountable end-to-end.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENTO BAND — tri-color frost: green / blue / brown / tri-sweep -->
+  <section class="band">
+    <div class="band__inner">
+      <article class="tile t1">
+        <span class="tile__eyebrow">Green · Heritage</span>
+        <div>
+          <h3>35 years of refined<br/>industrial chemistry.</h3>
+          <p>Founded in 1989, Chememan grew alongside Thailand's industrial transformation — and led it.</p>
+        </div>
+      </article>
+      <article class="tile t2">
+        <span class="tile__eyebrow">Blue · Digital</span>
+        <div>
+          <p class="tile__num" style="color: var(--cman-sky);">99.7%</p>
+          <p style="margin-top:8px;">Quicklime purity, monitored by AI vision in every kiln.</p>
+        </div>
+      </article>
+      <article class="tile t3">
+        <span class="tile__eyebrow">Brown · Earth</span>
+        <div>
+          <p class="tile__num" style="color: #E1B86B; font-size: clamp(2rem,3.5vw,2.75rem);">↓ 42% CO₂</p>
+          <p style="margin-top:8px;">Since 2020, on track for net-negative by 2030.</p>
+        </div>
+      </article>
+      <article class="tile t4">
+        <span class="tile__eyebrow">All three together</span>
+        <div>
+          <h3>"Lime is the silent ingredient in modern industry."</h3>
+          <p>— CEO, Chememan</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- CLEAN EDITORIAL — Levels.com / Yucca aesthetic.
+       Off-white background, oversized FC Minimal type, generous whitespace,
+       subtle CMAN green/blue accents. Use this between dense colorful sections
+       to give the eye a break and signal a tonal shift. -->
+  <section class="editorial">
+    <div class="editorial__inner">
+      <span class="editorial__num">— Section 03 / 05</span>
+      <div class="editorial__rule"></div>
+      <span class="editorial__eyebrow">Why it matters</span>
+
+      <div class="editorial__layout">
+        <div>
+          <h2>
+            Lime is the <em>silent chemistry</em> behind everything modern industry builds.
+          </h2>
+          <p class="editorial__lead">
+            Steel needs it. Water needs it. Semiconductors, sugar, paper, soil, and concrete all need it. We make it cleanly — and at the scale Asia's industries demand.
+          </p>
+        </div>
+
+        <div>
+          <div class="editorial__meta">
+            <div>
+              <p class="editorial__meta-label">Founded</p>
+              <p class="editorial__meta-value is-forest">1989</p>
+            </div>
+            <div>
+              <p class="editorial__meta-label">Listed (SET)</p>
+              <p class="editorial__meta-value is-blue">CMAN</p>
+            </div>
+            <div>
+              <p class="editorial__meta-label">Headquarters</p>
+              <p class="editorial__meta-value" style="font-size:1.25rem;">Bangkok, Thailand</p>
+            </div>
+            <div>
+              <p class="editorial__meta-label">Plants</p>
+              <p class="editorial__meta-value" style="font-size:1.25rem;">5 across SEA</p>
+            </div>
+          </div>
+
+          <div class="editorial__big-stats" style="margin-top:48px;">
+            <div>
+              <p class="editorial__big-stat-num is-forest">99.7%</p>
+              <p class="editorial__big-stat-label">Quicklime purity, monitored by AI vision in every kiln.</p>
+            </div>
+            <div>
+              <p class="editorial__big-stat-num is-amber">12</p>
+              <p class="editorial__big-stat-label">Countries we export to — across heavy industry, water, and food-grade applications.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="editorial__rule" style="margin-top:96px; margin-bottom:0;"></div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="row">
+      <img src="../assets/logo/chememan-full-logo.png" alt="Chememan"/>
+      <span><span class="stripe">SET : CMAN</span> · Bangkok, Thailand · © Chememan PCL</span>
+    </div>
+  </footer>
+
+</body>
+</html>
