@@ -1,53 +1,47 @@
 {
   "_meta": {
     "purpose": "PptxGenJS-friendly token mirror. Use these values when building .pptx via the pptx skill.",
-    "spec": "PptxGenJS expects HEX without #, fontFace as a single string, and points (pt) for spacing/font sizes."
+    "spec": "PptxGenJS expects HEX without #, fontFace as a single string, and points (pt) for spacing/font sizes.",
+    "provenance": "Regenerated 2026-08-15 from jakkaritw's approved Sea Green theme (tokens.css / tokens.json) — NOT the retired CI-book dark/glass palette. Light card + green shell aesthetic, not a dark hero deck.",
+    "note": "size_pt is a presentation-medium scale (points, not the web's px type scale) — a deck is a different medium from the web app, so this is a fresh, small, purpose-built scale, not a literal mirror of font.size in tokens.json."
   },
 
-  "_color_tier_note": "Working primary tier = green + blue + brown (FOREST, BLUE, AMBER). Sky + navy are secondary blues for highlights/depth. Other entries are tertiary accents.",
   "color": {
-    "FOREST":   "00522C",
-    "BLUE":     "3C60A5",
-    "AMBER":    "745021",
-    "WHITE":    "FFFFFF",
-    "BLACK":    "000000",
-    "NAVY":     "223562",
-    "SKY":      "5ECDF6",
-    "JADE":     "388062",
-    "MINT":     "20BB8D",
-    "EMERALD":  "00AC69",
-    "GOLD":     "CD9D3F",
-    "COPPER":   "AD6637",
-    "PEACH":    "F6CEB7",
-    "CORAL":    "E8676A",
-    "YELLOW":   "FFD100",
-    "MIST":     "EFEFEF",
-    "GREY":     "7F7F7F",
-    "CHARCOAL": "333333",
-    "BG_DARK":  "0B1A12",
-    "BG_DARK_ELEVATED": "0F2218",
-    "BG_BLUE_DARK": "0A0F1F",
-    "BG_BLUE_DARK_ELEVATED": "161F3C"
+    "SHELL":            "2E8B57",
+    "GREEN":             "2E8B57",
+    "TEAL":              "3FA06E",
+    "SURFACE":           "FBF9F3",
+    "SURFACE_INSET":     "EAE4D7",
+    "INK":               "1C1A16",
+    "INK_2":              "4A463D",
+    "INK_3":              "86806F",
+    "ACCENT_TEXT":       "B24222",
+    "STATUS_SAP":        "5E7A50",
+    "STATUS_APPROVED":   "4A5E80",
+    "SPECIAL_BG":        "F0E7D3",
+    "SPECIAL_EDGE":      "C9A24B",
+    "WHITE":             "FFFFFF",
+    "BLACK":             "000000"
   },
 
   "font": {
-    "primary":      "FC Minimal",
-    "primary_safe": "Inter",
+    "_note": "The web app uses the Bootstrap/system font stack, which has no single PPTX fontFace equivalent — Segoe UI is the closest practical match on the Windows machines this deck is built and viewed on.",
+    "primary":      "Segoe UI",
+    "primary_safe": "Arial",
     "fallback":     "Calibri",
-    "thai":         "FC Minimal",
     "mono":         "Consolas"
   },
 
   "size_pt": {
-    "display":  60,
-    "h1":       40,
-    "h2":       32,
-    "h3":       24,
-    "h4":       20,
-    "lead":     18,
-    "body":     16,
-    "caption":  12,
-    "footnote": 10
+    "display":  40,
+    "h1":       28,
+    "h2":       22,
+    "h3":       18,
+    "h4":       16,
+    "lead":     14,
+    "body":     12,
+    "caption":  10,
+    "footnote": 9
   },
 
   "slide_layout": {
@@ -59,10 +53,10 @@
   },
 
   "card_style": {
-    "fill":        { "color": "0F2218", "transparency": 30 },
-    "line":        { "color": "20BB8D", "width": 0.75, "transparency": 70 },
-    "shadow":      { "type": "outer", "blur": 24, "offset": 6, "angle": 90, "color": "000000", "opacity": 0.45 },
-    "rectRadius":  0.18
+    "fill":       { "color": "FBF9F3" },
+    "line":       { "color": "EAE4D7", "width": 0.75 },
+    "shadow":     { "type": "outer", "blur": 8, "offset": 2, "angle": 90, "color": "1C1A16", "opacity": 0.12 },
+    "rectRadius": 0.08
   },
 
   "logo_paths": {

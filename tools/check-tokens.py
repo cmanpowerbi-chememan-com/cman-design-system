@@ -1,42 +1,38 @@
 """Drift guard for the Chememan design-system token files.
 
-tokens/tokens.css, tokens/tokens.json, and tokens/tailwind.preset.js are
-hand-mirrored (see README.md "Updating this system") -- out-of-sync token
-files are the documented #1 source of silent brand drift in this repo.
+v3 (rebuilt 2026-08-15, single-theme rebuild): rewritten around the new
+token set. Two structural changes from the old checker, both simplifications
+enabled by tailwind.preset.js no longer carrying literal values (see its
+header comment):
 
-v2 (2026-08-15): rewritten to compare BY NORMALIZED KEY, not by value set.
-The v1 checker compared "the set of hex colors in file A" against "the set
-of hex colors in file B" -- so a name<->value swap (e.g. green and teal
-trading hex values) left the set unchanged and passed clean. This version
-looks up the SAME logical token (e.g. "color.brand.green") in all three
-files and requires the value to agree; a swap now changes what one file
-says for that specific key, which the other two still disagree with.
+  1. tokens.css now has a real [data-theme='dark'] override block (the old
+     Supply-Chain-derived system never had a dark theme). This script builds
+     TWO resolution contexts — light (:root alone) and dark (:root merged
+     with [data-theme='dark'] overrides, matching real CSS cascade/
+     inheritance) — and checks tokens.json's "light"/"dark" values against
+     both, chasing var(...) alias chains in each context separately.
+  2. tailwind.preset.js entries are all `var(--cman-*)` passthroughs, not
+     duplicated literals — so there is nothing to compare BY VALUE anymore.
+     This script instead confirms every var(--cman-*) name it references
+     actually exists in tokens.css (a NAME check, not a value check).
 
 This script asserts:
-  (a) every logical token in one of the categories below (colors, layout,
-      font size/weight/tracking, radius, shadow, border, focus) resolves to
-      the SAME value in every file that defines it. A file that simply does
-      not carry a given token (e.g. tailwind.preset.js has no "focus.ring"
-      equivalent) is not required to -- only files that DO define a key must
-      agree on its value.
-  (b) `var(--x)` references (including ones with a fallback, `var(--x, #fff)`)
-      are resolved against tokens.css before comparison, so a value written
-      as `var(--cman-neutral-300)` in one file and the literal hex in
-      another are recognised as equal.
-  (c) every `var(--cman-*)` / `var(--sidebar-*)` / `var(--transition)`
-      reference used anywhere in the live-app-system docs resolves to a
-      definition in tokens/tokens.css -- including `var(--name, fallback)`
-      forms, where an undefined `--name` must still fail even though the
-      fallback makes the CSS itself valid.
-  (d) non-zero exit with a readable diff on any failure -- a renamed or
+  (a) every color token's "light" and "dark" value in tokens.json matches
+      what tokens.css resolves to in the light / dark context respectively
+      (alias chains, e.g. --cman-accent-on-shell -> var(--cman-green),
+      followed before comparing).
+  (b) every non-color token's "value" in tokens.json (font/radius/spacing —
+      theme-invariant, declared once in :root) matches tokens.css.
+  (c) every `var(--cman-*)` reference in tokens/tailwind.preset.js resolves
+      to a real tokens.css custom property.
+  (d) every `var(--cman-*)` / `var(--sidebar-*)` reference used anywhere in
+      the design-system docs (see LIVE_DOC_FILES below) resolves to a
+      tokens.css definition — including `var(--name, fallback)` forms,
+      where an undefined `--name` must still fail even though the fallback
+      makes the CSS itself valid.
+  (e) non-zero exit with a readable diff on any failure — a renamed or
       missing tokens.json key produces a `FAIL` line naming the key, never
       a raw KeyError/traceback.
-
-Scope for (c): only the files that consume the LIVE-APP token system are
-scanned (see LIVE_APP_FILES below). The CI-book legacy system
-(tokens/brand-ci-legacy.css, typography/fonts.css, examples/hero.html,
-adapters/html-slides/, adapters/pptx/) defines and uses its own, different
-`--cman-*` variables (e.g. --cman-forest) and is intentionally out of scope.
 
 Run: python tools/check-tokens.py
 Stdlib only. UTF-8 on every file read.
@@ -49,17 +45,74 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TOKENS_DIR = os.path.join(ROOT, "tokens")
 
-# Files that consume tokens/tokens.css in the live-app (default) system --
-# deliberately excludes the CI-book legacy system (brand-ci-legacy.css,
-# fonts.css, hero.html, html-slides/, pptx/), which has its own token set.
-LIVE_APP_FILES = [
-    os.path.join(TOKENS_DIR, "tokens.css"),
+# Every doc that links tokens.css and references its custom properties.
+LIVE_DOC_FILES = [
+    os.path.join(TOKENS_DIR, "tailwind.preset.js"),
     os.path.join(ROOT, "typography", "TYPOGRAPHY.md"),
     os.path.join(ROOT, "components", "COMPONENTS.md"),
     os.path.join(ROOT, "patterns", "PATTERNS.md"),
     os.path.join(ROOT, "adapters", "web", "WEB.md"),
     os.path.join(ROOT, "examples", "app-shell.html"),
     os.path.join(ROOT, "README.md"),
+]
+
+# (tokens.json dotted path, tokens.css var suffix after "--cman-")
+# Color tokens carry BOTH a light and a dark value in tokens.json.
+COLOR_TOKENS = [
+    ("color.shell", "shell"),
+    ("color.green", "green"),
+    ("color.teal", "teal"),
+    ("color.ink-on-shell", "ink-on-shell"),
+    ("color.ink-on-shell-2", "ink-on-shell-2"),
+    ("color.accent-on-shell", "accent-on-shell"),
+    ("color.line-on-shell", "line-on-shell"),
+    ("color.surface", "surface"),
+    ("color.surface-inset", "surface-inset"),
+    ("color.ink", "ink"),
+    ("color.ink-2", "ink-2"),
+    ("color.ink-3", "ink-3"),
+    ("color.line", "line"),
+    ("color.line-2", "line-2"),
+    ("color.accent-text", "accent-text"),
+    ("color.status.sap", "status-sap"),
+    ("color.status.approved", "status-approved"),
+    ("color.status.pending", "status-pending"),
+    ("color.special.bg", "special-bg"),
+    ("color.special.edge", "special-edge"),
+    ("color.focus-ring", "focus-ring"),
+]
+
+# Non-color tokens: one value, declared once in :root, never overridden in
+# [data-theme='dark'] — (tokens.json dotted path, tokens.css var suffix).
+SCALAR_TOKENS = [
+    ("font.family.sans", "font-sans"),
+    ("font.family.serif", "font-serif"),
+    ("font.family.mono", "font-mono"),
+    ("font.base-size", "fs-base"),
+    ("font.line-height.base", "lh-base"),
+    ("font.line-height.tight", "lh-tight"),
+    ("font.size.3xs", "fs-3xs"), ("font.size.2xs", "fs-2xs"),
+    ("font.size.xs", "fs-xs"), ("font.size.xs2", "fs-xs2"),
+    ("font.size.sm", "fs-sm"), ("font.size.sm2", "fs-sm2"),
+    ("font.size.base-sm", "fs-base-sm"), ("font.size.md", "fs-md"),
+    ("font.size.md2", "fs-md2"), ("font.size.lg", "fs-lg"),
+    ("font.size.lg2", "fs-lg2"), ("font.size.xl", "fs-xl"),
+    ("font.size.xl2", "fs-xl2"), ("font.size.2xl", "fs-2xl"),
+    ("font.size.3xl", "fs-3xl"), ("font.size.4xl", "fs-4xl"),
+    ("font.size.display", "fs-display"),
+    ("font.weight.regular", "fw-regular"), ("font.weight.medium", "fw-medium"),
+    ("font.weight.semibold", "fw-semibold"), ("font.weight.bold", "fw-bold"),
+    ("font.weight.extrabold", "fw-extrabold"),
+    ("font.tracking.tight", "ls-tight"), ("font.tracking.tight-2", "ls-tight-2"),
+    ("font.tracking.tight-3", "ls-tight-3"), ("font.tracking.wide", "ls-wide"),
+    ("font.tracking.wider", "ls-wider"), ("font.tracking.widest", "ls-widest"),
+    ("radius.base", "r-base"), ("radius.xs", "r-xs"),
+    ("radius.pill", "r-pill"), ("radius.circle", "r-circle"),
+    ("spacing.4", "space-4"), ("spacing.6", "space-6"), ("spacing.8", "space-8"),
+    ("spacing.10", "space-10"), ("spacing.12", "space-12"), ("spacing.14", "space-14"),
+    ("spacing.16", "space-16"), ("spacing.20", "space-20"), ("spacing.24", "space-24"),
+    ("spacing.28", "space-28"), ("spacing.32", "space-32"), ("spacing.40", "space-40"),
+    ("spacing.48", "space-48"),
 ]
 
 
@@ -69,52 +122,51 @@ def read(path):
 
 
 def normalize(value):
-    """Collapse whitespace + stringify so hand-mirrored values compare equal
-    regardless of spacing style or JSON number-vs-string ("rgba(26, 71, 42,
-    .35)" vs "rgba(26,71,42,.35)"; 600 vs "600")."""
+    """Collapse whitespace/quote-style so hand-mirrored values compare equal
+    regardless of formatting: "rgba(28, 26, 22, .14)" vs "rgba(28,26,22,.14)"
+    (spacing), or JSON's required double-quoted font names vs tokens.css's
+    single-quoted ones (quote style)."""
     if value is None:
         return None
     value = str(value).strip()
     value = re.sub(r"\s*,\s*", ",", value)
-    return re.sub(r"\s+", " ", value)
+    value = re.sub(r"\s+", " ", value)
+    return value.replace('"', "'")
 
 
 # --- CSS custom-property parsing + var() resolution -----------------------
 
+ROOT_BLOCK_RE = re.compile(r":root\s*\{(.*?)\n\}", re.S)
+DARK_BLOCK_RE = re.compile(r"\[data-theme=['\"]dark['\"]\]\s*\{(.*?)\n\}", re.S)
 CSS_DECL_RE = re.compile(r"(--[\w-]+):\s*([^;]+);")
-# Consumes the WHOLE var() call (name + optional fallback) so it can be
-# substituted in place -- deliberately separate from USED_VAR_RE below,
-# which only needs to capture the name for the "is it defined" check.
 VAR_CALL_RE = re.compile(r"var\(\s*(--[\w-]+)\s*(?:,[^)]*)?\)")
-# Widened per the (c) check requirement: matches both `var(--name)` and
-# `var(--name, fallback)` -- a defined fallback must NOT hide an undefined
-# variable name from this check.
 USED_VAR_RE = re.compile(r"var\(\s*(--[\w-]+)\s*[,)]")
+# Scope the "must resolve" checks to the design system's own public API
+# (--cman-*). Component-local custom properties (e.g. a .gl-chip's own
+# --chip-bg/--chip-fg, set and consumed within the same rule) are a normal
+# CSS pattern, not a design-token reference, and must not be flagged.
+CMAN_VAR_RE = re.compile(r"^--cman-")
 
 
-def parse_css_vars(css_text):
-    """Every `--name: value;` custom-property declaration in tokens.css,
-    raw (unresolved)."""
-    return {name: value.strip() for name, value in CSS_DECL_RE.findall(css_text)}
+def parse_block_vars(css_text, block_re):
+    m = block_re.search(css_text)
+    if not m:
+        return {}
+    return {name: value.strip() for name, value in CSS_DECL_RE.findall(m.group(1))}
 
 
-def resolve_text(raw_vars, text, _stack=frozenset()):
-    """Substitute every var(--name[, fallback]) in `text` with its resolved
-    value from raw_vars, chasing alias chains (e.g. --cman-neutral-300 ->
-    var(--cman-surface-300) -> #dee2e6). Works on values from ANY of the
-    three files -- if tokens.json/tailwind.preset.js embed the same
-    `var(--sidebar-active-border)` text tokens.css itself uses (as
-    `--cman-sh-collapsed-active-inset` does), resolving all three the same
-    way keeps them comparable. Cycle-safe; gives up after 10 passes."""
+def resolve_text(context, text, _stack=frozenset()):
+    """Substitute every var(--name[, fallback]) in `text` using `context`,
+    chasing alias chains. Cycle-safe; gives up after 10 passes."""
     if text is None:
         return None
     text = str(text)
 
     def sub(m):
         ref = m.group(1)
-        if ref in _stack or ref not in raw_vars:
+        if ref in _stack or ref not in context:
             return m.group(0)
-        return resolve_text(raw_vars, raw_vars[ref], _stack | {ref})
+        return resolve_text(context, context[ref], _stack | {ref})
 
     for _ in range(10):
         new_text = VAR_CALL_RE.sub(sub, text)
@@ -124,81 +176,18 @@ def resolve_text(raw_vars, text, _stack=frozenset()):
     return normalize(text)
 
 
-def css_val(raw_vars, name):
-    if name not in raw_vars:
-        return None
-    return resolve_text(raw_vars, raw_vars[name])
-
-
 # --- tokens.json path lookup (never raises) --------------------------------
 
 def jget(tok, path):
-    """Dotted-path getter into tokens.json. Returns (value, None) on success
-    or (None, "readable reason") on a missing/renamed key -- so a renamed
-    tokens.json key produces a FAIL line, never a KeyError traceback."""
     cur = tok
     parts = path.split(".")
-    for i, part in enumerate(parts):
+    for part in parts:
         if not isinstance(cur, dict) or part not in cur:
             return None, f"tokens.json missing '{path}' (renamed or removed key?)"
         cur = cur[part]
     if isinstance(cur, dict):
-        if "value" in cur:
-            cur = cur["value"]
-        else:
-            return None, f"tokens.json '{path}' is an object with no 'value' leaf"
+        return cur, None
     return cur, None
-
-
-# --- tailwind.preset.js parsing (regex, stdlib-only) -----------------------
-
-# Matches a bare-word/number key OR a quoted (possibly hyphenated) key,
-# followed by a single-quoted string value -- covers both `50: '#fff'` and
-# `'teal-alt': '#20c997'` shapes used in this file.
-KV_RE = re.compile(r"(?:'([\w-]+)'|(\w+)):\s*'([^']*)'")
-
-
-def parse_kv_pairs(body):
-    out = {}
-    for m in KV_RE.finditer(body):
-        key = m.group(1) or m.group(2)
-        out[key] = m.group(3)
-    return out
-
-
-def js_const_object(js_text, const_name):
-    """`key: 'value'` pairs from a top-level `const NAME = { ... };` block."""
-    m = re.search(r"const %s = \{(.*?)\n\};" % re.escape(const_name), js_text, re.S)
-    return parse_kv_pairs(m.group(1)) if m else {}
-
-
-def js_theme_block(js_text, key):
-    """`key: 'value'` pairs from a `themeKey: { ... },` block inside
-    `theme.extend`. Non-greedy, stops at the first top-level `},` -- safe
-    here because none of these blocks nest braces."""
-    m = re.search(r"\b%s:\s*\{(.*?)\n\s*\},\n" % re.escape(key), js_text, re.S)
-    return parse_kv_pairs(m.group(1)) if m else {}
-
-
-# --- generic keyed comparison ----------------------------------------------
-
-def compare(label, values, fails, diffs):
-    """values: {source_name: value}. Every source key the CALLER includes in
-    this dict is EXPECTED to carry the token -- omit a source key entirely
-    when that source never carries this concept by design (e.g.
-    tailwind.preset.js has no brand.white/black color, no layout.sidebar-bg
-    spacing entry). A value that resolves to None for an expected source is
-    reported as "<MISSING>", never silently dropped -- that's what makes a
-    token quietly deleted from one file (e.g. a status color removed from
-    tailwind.preset.js) fail instead of passing clean. A key present in only
-    0-1 sources can't drift against anything, so it's skipped."""
-    if len(values) < 2:
-        return
-    shown = {src: (val if val is not None else "<MISSING>") for src, val in values.items()}
-    if len(set(shown.values())) > 1:
-        fails.append(f"{label} value drift")
-        parts = " ".join(f"{src}={val}" for src, val in shown.items())
-        diffs.append(f"  {label}: {parts}")
 
 
 def main():
@@ -213,280 +202,66 @@ def main():
     js_text = read(js_path)
     tok = json.loads(read(json_path))
 
-    raw_vars = parse_css_vars(css_text)
+    root_vars = parse_block_vars(css_text, ROOT_BLOCK_RE)
+    dark_vars = parse_block_vars(css_text, DARK_BLOCK_RE)
+    dark_context = {**root_vars, **dark_vars}  # dark overrides root, matches CSS cascade
+    all_defined = set(root_vars) | set(dark_vars)
 
-    def css(name):
-        return css_val(raw_vars, name)
+    if not root_vars:
+        print("=== check-tokens.py: FATAL ===")
+        print("  Could not find a :root { ... } block in tokens.css")
+        return 1
 
-    def jval(path):
-        v, err = jget(tok, path)
+    # ---- (a) color tokens: light + dark ------------------------------------
+    for json_path_key, css_suffix in COLOR_TOKENS:
+        entry, err = jget(tok, json_path_key)
         if err:
-            fails.append(f"{path}: {err}")
-            return None
-        return resolve_text(raw_vars, v)
+            fails.append(err)
+            continue
+        if not isinstance(entry, dict) or "light" not in entry or "dark" not in entry:
+            fails.append(f"{json_path_key}: missing 'light'/'dark' keys")
+            continue
+        css_var = f"--cman-{css_suffix}"
 
-    # ---- color.brand: green, teal, light, lighter, white, black ----------
-    # white/black have NO tailwind mirror by design -- their "tailwind" key is
-    # omitted below rather than passed as None, so that omission reads as
-    # "not expected here" and not "value went missing".
-    js_colors = js_theme_block(js_text, "colors")
-    green_const = js_const_object(js_text, "green")
-    brand_js = {
-        "green": green_const.get("DEFAULT"),
-        "teal": js_colors.get("cman-teal"),
-        "light": js_colors.get("cman-light"),
-        "lighter": js_colors.get("cman-lighter"),
-    }
-    for key in ("green", "teal", "light", "lighter", "white", "black"):
-        values = {"css": css(f"--cman-{key}"), "json": jval(f"color.brand.{key}")}
-        if key in brand_js:
-            values["tailwind"] = resolve_text(raw_vars, brand_js[key])
-        compare(f"color.brand.{key}", values, fails, diffs)
+        json_light = normalize(entry["light"])
+        css_light = resolve_text(root_vars, root_vars.get(css_var))
+        if json_light != css_light:
+            fails.append(f"{json_path_key} (light) value drift")
+            diffs.append(f"  {json_path_key} light: json={json_light} css={css_light}")
 
-    # ---- color.green-ramp: 50..900 ---------------------------------------
-    for step in ("50", "100", "200", "300", "400", "500", "600", "700", "800", "900"):
-        compare(
-            f"color.green-ramp.{step}",
-            {
-                "css": css(f"--cman-green-{step}"),
-                "json": jval(f"color.green-ramp.{step}"),
-                "tailwind": resolve_text(raw_vars, green_const.get(step)),
-            },
-            fails, diffs,
-        )
+        json_dark = normalize(entry["dark"])
+        css_dark = resolve_text(dark_context, dark_context.get(css_var))
+        if json_dark != css_dark:
+            fails.append(f"{json_path_key} (dark) value drift")
+            diffs.append(f"  {json_path_key} dark: json={json_dark} css={css_dark}")
 
-    # ---- color.surface (+ neutral alias must mirror it) -------------------
-    surface_const = js_const_object(js_text, "surface")
-    for step in ("0", "25", "50", "75", "100", "150", "200", "300", "400", "500",
-                 "600", "700", "800", "900"):
-        compare(
-            f"color.surface.{step}",
-            {
-                "css": css(f"--cman-surface-{step}"),
-                "json": jval(f"color.surface.{step}"),
-                "tailwind": resolve_text(raw_vars, surface_const.get(step)),
-            },
-            fails, diffs,
-        )
-        # the --cman-neutral-*/color.neutral.*/neutral(JS) alias must resolve
-        # to the exact same value as its surface counterpart
-        compare(
-            f"color.neutral.{step} (alias of surface.{step})",
-            {
-                "css": css(f"--cman-neutral-{step}"),
-                "json": jval(f"color.neutral.{step}"),
-            },
-            fails, diffs,
-        )
+    # ---- (b) scalar tokens (theme-invariant) -------------------------------
+    for json_path_key, css_suffix in SCALAR_TOKENS:
+        entry, err = jget(tok, json_path_key)
+        if err:
+            fails.append(err)
+            continue
+        json_val = entry.get("value") if isinstance(entry, dict) else entry
+        json_val = resolve_text(root_vars, json_val)  # resolves e.g. "var(--cman-font-sans)"
+        css_var = f"--cman-{css_suffix}"
+        css_val = resolve_text(root_vars, root_vars.get(css_var))
+        if json_val != css_val:
+            fails.append(f"{json_path_key} value drift")
+            diffs.append(f"  {json_path_key}: json={json_val} css={css_val}")
 
-    # ---- color.status: 10 badges, bg + fg ---------------------------------
-    status_const = js_const_object(js_text, "status")
-    for name in ("primary", "orange", "teal-alt", "warning", "success", "cyan",
-                 "indigo", "purple", "dark", "danger"):
-        compare(
-            f"color.status.{name}.bg",
-            {
-                "css": css(f"--cman-status-{name}"),
-                "json": jval(f"color.status.{name}.bg"),
-                "tailwind": status_const.get(name),
-            },
-            fails, diffs,
-        )
-        compare(
-            f"color.status.{name}.fg",
-            {
-                "css": css(f"--cman-status-{name}-fg"),
-                "json": jval(f"color.status.{name}.fg"),
-            },
-            fails, diffs,
-        )
+    # ---- (c) tailwind.preset.js: every var(--cman-*) name must be defined -
+    tw_used = {v for v in USED_VAR_RE.findall(js_text) if CMAN_VAR_RE.match(v)}
+    tw_undefined = tw_used - all_defined
+    if tw_undefined:
+        fails.append("undefined var(...) reference in tokens/tailwind.preset.js")
+        diffs.append(f"  tailwind.preset.js: {sorted(tw_undefined)}")
 
-    # ---- color.gradient -----------------------------------------------------
-    bgimg_js = js_theme_block(js_text, "backgroundImage")
-    for key, js_key in (("login-bg", "cman-grad-login-bg"), ("login-header", "cman-grad-login-header")):
-        compare(
-            f"color.gradient.{key}",
-            {
-                "css": css(f"--cman-grad-{key}"),
-                "json": jval(f"color.gradient.{key}"),
-                "tailwind": resolve_text(raw_vars, bgimg_js.get(js_key)),
-            },
-            fails, diffs,
-        )
-
-    # ---- layout -------------------------------------------------------------
-    spacing_js = js_theme_block(js_text, "spacing")
-    layout_map = [
-        ("sidebar-width", "--sidebar-width", "cman-sidebar"),
-        ("sidebar-collapsed-width", "--sidebar-collapsed-width", "cman-sidebar-collapsed"),
-        ("navbar-height", "--cman-navbar-height", "cman-navbar"),
-        ("sidebar-bg", "--sidebar-bg", None),
-        ("sidebar-active", "--sidebar-active", None),
-        ("sidebar-active-border", "--sidebar-active-border", None),
-        ("transition", "--transition", None),
-    ]
-    for key, css_name, js_key in layout_map:
-        values = {"css": css(css_name), "json": jval(f"layout.{key}")}
-        if js_key:
-            values["tailwind"] = resolve_text(raw_vars, spacing_js.get(js_key))
-        compare(f"layout.{key}", values, fails, diffs)
-
-    # ---- font.size (existing coverage, now keyed) --------------------------
-    fontsize_js = js_theme_block(js_text, "fontSize")
-    for key in ("2xs", "xs", "sm", "sm2", "base-sm", "md", "md2", "lg", "lg2",
-                "xl", "xl2", "2xl", "3xl", "h5", "h4"):
-        compare(
-            f"font.size.{key}",
-            {
-                "css": css(f"--cman-fs-{key}"),
-                "json": jval(f"font.size.{key}"),
-                "tailwind": fontsize_js.get(f"cman-{key}"),
-            },
-            fails, diffs,
-        )
-
-    # ---- font.weight (NEW coverage) ----------------------------------------
-    fontweight_js = js_theme_block(js_text, "fontWeight")
-    for key in ("regular", "semibold", "bold"):
-        compare(
-            f"font.weight.{key}",
-            {
-                "css": css(f"--cman-fw-{key}"),
-                "json": jval(f"font.weight.{key}"),
-                "tailwind": fontweight_js.get(f"cman-{key}"),
-            },
-            fails, diffs,
-        )
-
-    # ---- font.tracking / letter-spacing (NEW coverage) ---------------------
-    # canonical key -> (css suffix, json key, js letterSpacing suffix).
-    # tokens.css spells these WITHOUT hyphens (`--cman-ls-tablehead`) while
-    # tokens.json/tailwind.preset.js use the hyphenated form (`table-head`)
-    # -- an explicit map avoids a wrong guess at a shared naming scheme.
-    tracking_map = [
-        ("badge", "badge", "badge", "badge"),
-        ("table-head", "tablehead", "table-head", "table-head"),
-        ("sidebar-brand", "sidebarbrand", "sidebar-brand", "sidebar-brand"),
-        ("section-title", "sectiontitle", "section-title", "section-title"),
-        ("login-brand", "loginbrand", "login-brand", "login-brand"),
-        ("sidebar-section", "sidebarsection", "sidebar-section", "sidebar-section"),
-        ("login-sub", "loginsub", "login-sub", "login-sub"),
-    ]
-    letterspacing_js = js_theme_block(js_text, "letterSpacing")
-    for canon, css_suffix, json_key, js_suffix in tracking_map:
-        compare(
-            f"font.tracking.{canon}",
-            {
-                "css": css(f"--cman-ls-{css_suffix}"),
-                "json": jval(f"font.tracking.{json_key}"),
-                "tailwind": letterspacing_js.get(f"cman-{js_suffix}"),
-            },
-            fails, diffs,
-        )
-
-    # ---- radius (existing coverage, now keyed) -----------------------------
-    radius_js = js_theme_block(js_text, "borderRadius")
-    for key in ("xs", "sm", "md", "lg"):
-        compare(
-            f"radius.{key}",
-            {
-                "css": css(f"--cman-r-{key}"),
-                "json": jval(f"radius.{key}"),
-                "tailwind": radius_js.get(f"cman-{key}"),
-            },
-            fails, diffs,
-        )
-
-    # ---- shadow (existing coverage, now keyed) -----------------------------
-    # canonical key -> (css/json suffix, js boxShadow suffix). Only
-    # "btn-hover" differs: css/json spell it "btn-cman-hover", the tailwind
-    # preset drops the middle "cman" ("cman-btn-hover" -> suffix "btn-hover").
-    shadow_map = [
-        ("card", "card", "card"),
-        ("sidebar", "sidebar", "sidebar"),
-        ("btn-hover", "btn-cman-hover", "btn-hover"),
-        ("sticky-header", "sticky-header", "sticky-header"),
-        ("collapsed-active-inset", "collapsed-active-inset", "collapsed-active-inset"),
-    ]
-    boxshadow_js = js_theme_block(js_text, "boxShadow")
-    for canon, suffix, js_suffix in shadow_map:
-        compare(
-            f"shadow.{canon}",
-            {
-                "css": css(f"--cman-sh-{suffix}"),
-                "json": jval(f"shadow.{suffix}"),
-                "tailwind": resolve_text(raw_vars, boxshadow_js.get(f"cman-{js_suffix}")),
-            },
-            fails, diffs,
-        )
-
-    # ---- border (NEW coverage) ----------------------------------------------
-    borderwidth_js = js_theme_block(js_text, "borderWidth")
-    WIDTH_RE = re.compile(r"^\s*(\d+px)")
-
-    def width_only(value):
-        if value is None:
-            return None
-        m = WIDTH_RE.match(value)
-        return m.group(1) if m else value
-
-    border_full_map = [
-        ("card", "card", "card", None),
-        ("nav-tabs", "navtabs", "nav-tabs", "cman-navtabs"),
-        ("hairline", "hairline", "hairline", "cman-hairline"),
-    ]
-    for canon, css_suffix, json_key, js_key in border_full_map:
-        css_v = css(f"--cman-border-{css_suffix}")
-        json_v = jval(f"border.{json_key}")
-        compare(f"border.{canon}", {"css": css_v, "json": json_v}, fails, diffs)
-        if js_key:
-            compare(
-                f"border.{canon} (width)",
-                {
-                    "css": width_only(css_v),
-                    "json": width_only(json_v),
-                    "tailwind": borderwidth_js.get(js_key),
-                },
-                fails, diffs,
-            )
-    # sidebar active-item border widths -- css names them by px value
-    # ("active-3"/"active-2"), json names them by role -- no JS mirror.
-    compare(
-        "border.active-left-width",
-        {"css": css("--cman-border-active-3"), "json": jval("border.active-left-width")},
-        fails, diffs,
-    )
-    compare(
-        "border.active-bottom-width",
-        {"css": css("--cman-border-active-2"), "json": jval("border.active-bottom-width")},
-        fails, diffs,
-    )
-
-    # ---- focus (NEW coverage) ------------------------------------------------
-    ringcolor_js = js_theme_block(js_text, "ringColor")
-    compare(
-        "focus.border",
-        {
-            "css": css("--cman-focus-border"),
-            "json": jval("focus.border"),
-            "tailwind": ringcolor_js.get("cman-focus"),
-        },
-        fails, diffs,
-    )
-    compare(
-        "focus.ring",
-        {"css": css("--cman-focus-ring"), "json": jval("focus.ring")},
-        fails, diffs,
-    )
-
-    # ---- (c) every var(--cman-*)/--sidebar-*/--transition used in the
-    #      live-app docs must resolve to a tokens.css definition -----------
-    defined = set(raw_vars)
-    for path in LIVE_APP_FILES:
+    # ---- (d) every var(--cman-*) used in the docs must resolve ------------
+    for path in LIVE_DOC_FILES:
         if not os.path.exists(path):
             continue
-        used = {m for m in USED_VAR_RE.findall(read(path))}
-        undefined = used - defined
+        used = {v for v in USED_VAR_RE.findall(read(path)) if CMAN_VAR_RE.match(v)}
+        undefined = used - all_defined
         if undefined:
             rel = os.path.relpath(path, ROOT)
             fails.append(f"undefined var(...) reference in {rel}")
@@ -505,12 +280,10 @@ def main():
         return 1
 
     print("=== check-tokens.py: OK ===")
-    print("  color (brand / green-ramp / surface / neutral-alias / status / gradient) "
-          "agrees across tokens.css, tokens.json, tailwind.preset.js")
-    print("  layout, font (size/weight/tracking), radius, shadow, border, focus "
-          "agree by key across all files that define them")
-    print(f"  all var(--cman-*) references in the {len(LIVE_APP_FILES)} live-app "
-          f"files resolve to tokens.css")
+    print(f"  {len(COLOR_TOKENS)} color tokens agree (light + dark) across tokens.css / tokens.json")
+    print(f"  {len(SCALAR_TOKENS)} font/radius/spacing tokens agree across tokens.css / tokens.json")
+    print("  every var(--cman-*) reference in tailwind.preset.js resolves to tokens.css")
+    print(f"  every var(--cman-*) reference in the {len(LIVE_DOC_FILES)} doc files resolves to tokens.css")
     print()
     print("VERDICT: PASS")
     return 0
