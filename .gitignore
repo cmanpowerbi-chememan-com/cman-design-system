@@ -1,0 +1,17 @@
+# Authenticated HTML dumps used to author this design system contain live
+# __RequestVerificationToken values and other per-session secrets -- never
+# commit raw re-extraction output, only the derived, sanitized CSS/docs.
+theme_dump/
+*.har
+*.log
+.DS_Store
+node_modules/
+creds*.json
+
+# A re-extraction dump can also land at the repo ROOT (e.g. the anonymous
+# login page capture, `root.html`, which carries a live
+# __RequestVerificationToken) instead of only inside theme_dump/ -- catch
+# that case too, plus the aggregate report these scripts produce.
+root.html
+*_Index.html
+theme_report.txt

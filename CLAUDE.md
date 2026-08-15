@@ -1,5 +1,17 @@
 # Chememan Modern Design System — agent brief
 
+> **2026-08-15 pivot — read this first.** This file (and everything it
+> describes below: CI-book Forest/Blue/Amber palette, glassmorphism/bento,
+> FC Minimal) is now the **legacy / opt-in** system — use it only for
+> marketing, investor, or brand-forward surfaces that intentionally follow
+> the official CI book. For anything meant to look like the live Chememan
+> **Supply Chain** app (the default going forward), use the extracted-from-
+> production system instead: start at `README.md`, tokens in `tokens/tokens.css`
+> + `tokens/tokens.json`, components in `components/COMPONENTS.md`, patterns
+> in `patterns/PATTERNS.md`, drop-in guide in `adapters/web/WEB.md`. The
+> palette/component docs below were preserved unchanged (see
+> `tokens/brand-ci-legacy.css` for the color system this file describes).
+
 **Read this file before producing any Chememan-branded deliverable** — website, scrollable HTML deck, PPTX, dashboard, motion graphic, or printed asset. The design system below is the single source of truth; it merges:
 
 1. The official **Chememan Corporate Identity Standard Manual** (logo grid, clear-space, primary colors, secondary palette, typography).

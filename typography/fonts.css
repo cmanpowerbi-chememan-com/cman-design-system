@@ -3,6 +3,14 @@
    18 styles (9 weights × 2 italics).
    Fonts ship in ../assets/fonts/ — adjust the relative path if you move this file.
 
+   OPT-IN (2026-08-15): the LIVE Chememan Supply Chain app
+   (https://sc-qas.chememan.com) does NOT load this font — it renders in the
+   Bootstrap 5.3.2 default system-font stack (see typography/TYPOGRAPHY.md).
+   FC Minimal belongs to the prior CI-book-derived design-system iteration
+   (tokens/brand-ci-legacy.css). Use it for marketing / investor / brand-forward
+   surfaces that intentionally follow the CI book, not for anything meant to
+   look like the live admin app.
+
    Usage: <link rel="stylesheet" href="design-system/chememan/typography/fonts.css">
           body { font-family: 'FC Minimal', sans-serif; }
    ========================================================================= */
