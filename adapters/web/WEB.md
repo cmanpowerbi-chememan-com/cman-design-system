@@ -16,33 +16,19 @@ instead, see "Tailwind projects" below.
 </head>
 ```
 
-That's it — no CDN, no build step. `tokens.css` carries every color
-(light + dark via `[data-theme='dark']`), the type scale, radius, and
-spacing as CSS custom properties. Write your own component CSS against
-those custom properties, using the class names and snippets in
-`components/COMPONENTS.md` as the starting point (they're copy-paste
-compatible with the real app).
+That's it — no CDN, no build step. `tokens.css` carries every color, the
+type scale, radius, and spacing as CSS custom properties. Write your own
+component CSS against those custom properties, using the class names and
+snippets in `components/COMPONENTS.md` as the starting point (they're
+copy-paste compatible with the real app).
 
-## 2. Dark mode
-
-The theme switches via a `data-theme` attribute, not a class or media
-query:
-
-```html
-<html data-theme="dark">
-```
-
-Toggle it in JS (`document.documentElement.setAttribute('data-theme',
-'dark')`) and every `--cman-*` color custom property repoints
-automatically — no separate dark stylesheet to maintain.
-
-## 3. Wire up the app shell
+## 2. Wire up the app shell
 
 Copy `.nav` / `.wrap` / `.page-head` from `components/COMPONENTS.md` §
 Nav and `patterns/PATTERNS.md` § 1. That's the whole shell — no framework
 component library needed.
 
-## 4. Quick decision tree
+## 3. Quick decision tree
 
 | Want to build… | Start from |
 |---|---|
@@ -64,9 +50,9 @@ module.exports = { presets: [cman], content: [...] };
 This gets you `bg-cman-shell`, `text-cman-ink`, `bg-cman-green`, etc. —
 each one is a thin `var(--cman-*)` forward into `tokens.css` (see the
 preset's own header comment), so **you must still link `tokens/tokens.css`**
-for these utility classes to resolve to anything. The upside: dark-mode
-switching via `data-theme` works through Tailwind classes automatically,
-with nothing to keep in sync between the preset and the CSS file.
+for these utility classes to resolve to anything. The upside: literal
+values live in exactly one place (`tokens.css`) — nothing to keep in sync
+between the preset and the CSS file.
 
 For a pixel-identical drop-in, prefer plain CSS + `components/COMPONENTS.md`
 over reimplementing components as Tailwind utility soup — the source app

@@ -15,15 +15,11 @@
  * DESIGN NOTE — this preset does NOT duplicate literal hex/px values. Every
  * entry below is a `var(--cman-*)` reference straight into tokens.css, which
  * you must also link (`<link rel="stylesheet" href=".../tokens.css">`) for
- * these classes to resolve. Two reasons:
- *   1. tokens.css already carries a [data-theme='dark'] override for every
- *      color — forwarding the CSS variable means `bg-cman-green` etc. keep
- *      switching with the app's light/dark toggle automatically, with
- *      nothing to keep in sync here.
- *   2. It removes tailwind.preset.js as a THIRD place a literal value could
- *      drift from tokens.css/tokens.json — tools/check-tokens.py only needs
- *      to confirm each `var(--cman-*)` name below actually exists in
- *      tokens.css, not that some duplicated hex still matches.
+ * these classes to resolve. This keeps tailwind.preset.js from becoming a
+ * SECOND place a literal value could drift from tokens.css/tokens.json —
+ * tools/check-tokens.py only needs to confirm each `var(--cman-*)` name
+ * below actually exists in tokens.css, not that some duplicated hex still
+ * matches.
  */
 
 module.exports = {

@@ -102,13 +102,12 @@ const s3 = pres.addSlide({ masterName: "CMAN_MASTER" });
 });
 ```
 
-## Light-mode is the only mode
+## Only one theme
 
-There is no separate "dark deck" variant in this system — the web app's
-dark theme exists for on-screen editing comfort, not for printed/exported
-decks. If a board printout genuinely needs different ink/paper values,
-that's a new, explicit decision — don't repurpose `tokens.pptx.json` as-is
-for a dark deck.
+The design system ships a single light Sea Green theme — there's nothing
+to branch on for a deck. If a board printout genuinely needs different
+ink/paper values, that's a new, explicit decision — don't repurpose
+`tokens.pptx.json` values for that without one.
 
 ## Render
 

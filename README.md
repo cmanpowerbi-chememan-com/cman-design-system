@@ -32,7 +32,7 @@ python tools/check-tokens.py
 
 ## What's inside
 
-- **Tokens** (`tokens/`) — colors (light + dark), type scale, weights,
+- **Tokens** (`tokens/`) — colors, type scale, weights,
   letter-spacing, radius, spacing. `tokens.json` is authoritative;
   `tokens.css` mirrors it as CSS custom properties; `tailwind.preset.js`
   forwards `var(--cman-*)` references into Tailwind (no duplicated
@@ -59,18 +59,18 @@ python tools/check-tokens.py
 
 ## The theme, at a glance
 
-| Role | Token | Light | Dark |
-|---|---|---|---|
-| Page shell / nav background | `--cman-shell` | `#2e8b57` | `#1c1a16` |
-| Brand accent (button fill, links) | `--cman-green` | `#2e8b57` | `#3fa06e` |
-| Hover / lighter step | `--cman-teal` | `#3fa06e` | `#5cbf8c` |
-| Card surface | `--cman-surface` | `#fbf9f3` | `#2a251e` |
-| Card surface, inset | `--cman-surface-inset` | `#eae4d7` | `#242019` |
-| Ink (primary text on a card) | `--cman-ink` | `#1c1a16` | `#f2eee5` |
-| Accent text on a card | `--cman-accent-text` | `#b24222` | `#3fa06e` |
-| Status — SAP | `--cman-status-sap` | `#5e7a50` | `#8fa97e` |
-| Status — Approved | `--cman-status-approved` | `#4a5e80` | `#8098c0` |
-| Special row | `--cman-special-bg` / `--cman-special-edge` | `#f0e7d3` / `#c9a24b` | `#33280f` / `#5c4915` |
+| Role | Token | Value |
+|---|---|---|
+| Page shell / nav background | `--cman-shell` | `#2e8b57` |
+| Brand accent (button fill, links) | `--cman-green` | `#2e8b57` |
+| Hover / lighter step | `--cman-teal` | `#3fa06e` |
+| Card surface | `--cman-surface` | `#fbf9f3` |
+| Card surface, inset | `--cman-surface-inset` | `#eae4d7` |
+| Ink (primary text on a card) | `--cman-ink` | `#1c1a16` |
+| Accent text on a card | `--cman-accent-text` | `#b24222` |
+| Status — SAP | `--cman-status-sap` | `#5e7a50` |
+| Status — Approved | `--cman-status-approved` | `#4a5e80` |
+| Special row | `--cman-special-bg` / `--cman-special-edge` | `#f0e7d3` / `#c9a24b` |
 
 Full table with roles + every token → `tokens/tokens.json`.
 
@@ -128,7 +128,7 @@ names above (or vice versa) — no value guesswork needed.
 
 ```
 tokens/
-  tokens.json               ← authoritative machine-readable tokens (light + dark)
+  tokens.json               ← authoritative machine-readable tokens
   tokens.css                ← CSS custom properties, mirrors tokens.json
   tokens.pptx.json           ← PptxGenJS mirror (regenerated for this theme)
   tailwind.preset.js         ← Tailwind preset — var(--cman-*) passthrough, no duplicated literals
@@ -152,22 +152,21 @@ assets/
 ## Updating this system
 
 - **`tokens/tokens.json` is authoritative** — edit it first, then mirror to
-  `tokens/tokens.css` by hand (colors need BOTH a `light` and `dark`
-  value). `tokens/tailwind.preset.js` never needs a matching edit for a
-  value change — it only forwards `var(--cman-*)` names, so it only needs
-  touching when you add or rename a token. After editing tokens, run the
-  drift guard:
+  `tokens/tokens.css` by hand. `tokens/tailwind.preset.js` never needs a
+  matching edit for a value change — it only forwards `var(--cman-*)`
+  names, so it only needs touching when you add or rename a token. After
+  editing tokens, run the drift guard:
 
   ```bash
   python tools/check-tokens.py
   ```
 
-  It resolves every token in BOTH the light (`:root`) and dark
-  (`[data-theme='dark']`) contexts — chasing `var()` alias chains the same
-  way a browser would — and fails with a readable diff on any mismatch
-  between `tokens.css` and `tokens.json`, or on any `var(--cman-*)`
-  reference in the docs/`tailwind.preset.js` that doesn't resolve to a real
-  `tokens.css` definition. Run it before committing any token change.
+  It resolves every token in the `:root` context — chasing `var()` alias
+  chains the same way a browser would — and fails with a readable diff on
+  any mismatch between `tokens.css` and `tokens.json`, or on any
+  `var(--cman-*)` reference in the docs/`tailwind.preset.js` that doesn't
+  resolve to a real `tokens.css` definition. Run it before committing any
+  token change.
 - Adding a component or pattern? Append to the relevant `.md` with a
   working snippet — don't create a sub-file unless it's genuinely large
   (>500 lines).

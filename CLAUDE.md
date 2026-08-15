@@ -21,7 +21,7 @@ with a second palette.
 CLAUDE.md                    ← this file (auto-loaded entry point)
 README.md                    ← human-facing usage doc (start here for tutorials)
 tokens/
-  tokens.json                ← canonical machine-readable tokens (authoritative, light + dark)
+  tokens.json                ← canonical machine-readable tokens (authoritative)
   tokens.css                 ← CSS custom properties, mirrors tokens.json
   tokens.pptx.json           ← PptxGenJS-friendly mirror
   tailwind.preset.js         ← Tailwind preset — var(--cman-*) passthrough, no duplicated literals
@@ -68,9 +68,8 @@ components → patterns → adapters, in that order (see README.md
 - **On-shell text is white**, not cream/gold. The muted on-shell tier and
   the old gold accent both fail WCAG AA on this shell and are retired for
   that role — see the contrast rule below.
-- **Cards stay light** (`--cman-surface` / `--cman-surface-inset`) in both
-  themes except where the dark-theme override says otherwise — most of the
-  app renders on cards floating on the shell, not directly on it.
+- **Cards stay light** (`--cman-surface` / `--cman-surface-inset`) — most of
+  the app renders on cards floating on the shell, not directly on it.
 - **No custom webfont.** The system font stack (Bootstrap 5.3.2's default)
   is the only typeface. FC Minimal and its 36 font files are retired —
   do not re-add `@font-face` to this system without a new, explicit
@@ -124,11 +123,10 @@ Practical consequences:
   webfont.
 - ❌ Painting muted or gold ink directly on the shell — see the contrast
   rule above.
-- ❌ Treating `--cman-shell` and `--cman-green` as always-identical — they
-  hold the same value in light theme but diverge in dark theme (near-black
-  shell + a separate lighter-green accent). Always use the token for the
-  ROLE you mean (page background vs. button/link fill), not whichever
-  happens to match visually in light theme.
+- ❌ Treating `--cman-shell` and `--cman-green` as interchangeable just
+  because they hold the same value — they name different ROLES (page
+  background vs. button/link fill). Always use the token for the role you
+  mean, not whichever happens to match visually today.
 - ❌ Hardcoded HEX or px values in new components — always reach into
   `tokens.css` (web) or `tokens.pptx.json` (PPTX).
 - ❌ Inventing a font-size, radius, or spacing value the source app
@@ -137,8 +135,8 @@ Practical consequences:
 
 ## Updating this system
 
-- Token changes go to `tokens/tokens.json` first (both `light` and `dark`
-  values for colors); mirror to `tokens/tokens.css` immediately.
+- Token changes go to `tokens/tokens.json` first; mirror to
+  `tokens/tokens.css` immediately.
   `tokens/tailwind.preset.js` only needs an edit when you add/rename a
   token (it forwards `var(--cman-*)` names, never literal values). Run
   `python tools/check-tokens.py` before committing.

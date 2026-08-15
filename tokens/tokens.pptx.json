@@ -2,7 +2,7 @@
   "_meta": {
     "purpose": "PptxGenJS-friendly token mirror. Use these values when building .pptx via the pptx skill.",
     "spec": "PptxGenJS expects HEX without #, fontFace as a single string, and points (pt) for spacing/font sizes.",
-    "provenance": "Regenerated 2026-08-15 from jakkaritw's approved Sea Green theme (tokens.css / tokens.json) — NOT the retired CI-book dark/glass palette. Light card + green shell aesthetic, not a dark hero deck.",
+    "provenance": "Regenerated 2026-08-15 from jakkaritw's approved Sea Green theme (tokens.css / tokens.json) — NOT the retired CI-book glass palette. Light card + green shell aesthetic only.",
     "note": "size_pt is a presentation-medium scale (points, not the web's px type scale) — a deck is a different medium from the web app, so this is a fresh, small, purpose-built scale, not a literal mirror of font.size in tokens.json."
   },
 

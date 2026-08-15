@@ -1,28 +1,18 @@
 """Drift guard for the Chememan design-system token files.
 
-v3 (rebuilt 2026-08-15, single-theme rebuild): rewritten around the new
-token set. Two structural changes from the old checker, both simplifications
-enabled by tailwind.preset.js no longer carrying literal values (see its
-header comment):
-
-  1. tokens.css now has a real [data-theme='dark'] override block (the old
-     Supply-Chain-derived system never had a dark theme). This script builds
-     TWO resolution contexts — light (:root alone) and dark (:root merged
-     with [data-theme='dark'] overrides, matching real CSS cascade/
-     inheritance) — and checks tokens.json's "light"/"dark" values against
-     both, chasing var(...) alias chains in each context separately.
-  2. tailwind.preset.js entries are all `var(--cman-*)` passthroughs, not
-     duplicated literals — so there is nothing to compare BY VALUE anymore.
-     This script instead confirms every var(--cman-*) name it references
-     actually exists in tokens.css (a NAME check, not a value check).
+v4 (dark mode removed 2026-08-15): jakkaritw decided the app ships ONE
+theme only — light Sea Green — so this script now resolves a single
+`:root` context. tailwind.preset.js entries are all `var(--cman-*)`
+passthroughs, not duplicated literals, so there is nothing to compare BY
+VALUE there — this script instead confirms every var(--cman-*) name it
+references actually exists in tokens.css (a NAME check, not a value check).
 
 This script asserts:
-  (a) every color token's "light" and "dark" value in tokens.json matches
-      what tokens.css resolves to in the light / dark context respectively
-      (alias chains, e.g. --cman-accent-on-shell -> var(--cman-green),
-      followed before comparing).
-  (b) every non-color token's "value" in tokens.json (font/radius/spacing —
-      theme-invariant, declared once in :root) matches tokens.css.
+  (a) every color token's "value" in tokens.json matches what tokens.css
+      resolves to in `:root` (alias chains, e.g. --cman-accent-on-shell ->
+      var(--cman-green), followed before comparing).
+  (b) every non-color token's "value" in tokens.json (font/radius/spacing)
+      matches tokens.css.
   (c) every `var(--cman-*)` reference in tokens/tailwind.preset.js resolves
       to a real tokens.css custom property.
   (d) every `var(--cman-*)` / `var(--sidebar-*)` reference used anywhere in
@@ -57,7 +47,6 @@ LIVE_DOC_FILES = [
 ]
 
 # (tokens.json dotted path, tokens.css var suffix after "--cman-")
-# Color tokens carry BOTH a light and a dark value in tokens.json.
 COLOR_TOKENS = [
     ("color.shell", "shell"),
     ("color.green", "green"),
@@ -82,8 +71,8 @@ COLOR_TOKENS = [
     ("color.focus-ring", "focus-ring"),
 ]
 
-# Non-color tokens: one value, declared once in :root, never overridden in
-# [data-theme='dark'] — (tokens.json dotted path, tokens.css var suffix).
+# Non-color tokens: one value, declared once in :root —
+# (tokens.json dotted path, tokens.css var suffix).
 SCALAR_TOKENS = [
     ("font.family.sans", "font-sans"),
     ("font.family.serif", "font-serif"),
@@ -137,7 +126,6 @@ def normalize(value):
 # --- CSS custom-property parsing + var() resolution -----------------------
 
 ROOT_BLOCK_RE = re.compile(r":root\s*\{(.*?)\n\}", re.S)
-DARK_BLOCK_RE = re.compile(r"\[data-theme=['\"]dark['\"]\]\s*\{(.*?)\n\}", re.S)
 CSS_DECL_RE = re.compile(r"(--[\w-]+):\s*([^;]+);")
 VAR_CALL_RE = re.compile(r"var\(\s*(--[\w-]+)\s*(?:,[^)]*)?\)")
 USED_VAR_RE = re.compile(r"var\(\s*(--[\w-]+)\s*[,)]")
@@ -203,37 +191,29 @@ def main():
     tok = json.loads(read(json_path))
 
     root_vars = parse_block_vars(css_text, ROOT_BLOCK_RE)
-    dark_vars = parse_block_vars(css_text, DARK_BLOCK_RE)
-    dark_context = {**root_vars, **dark_vars}  # dark overrides root, matches CSS cascade
-    all_defined = set(root_vars) | set(dark_vars)
+    all_defined = set(root_vars)
 
     if not root_vars:
         print("=== check-tokens.py: FATAL ===")
         print("  Could not find a :root { ... } block in tokens.css")
         return 1
 
-    # ---- (a) color tokens: light + dark ------------------------------------
+    # ---- (a) color tokens ---------------------------------------------------
     for json_path_key, css_suffix in COLOR_TOKENS:
         entry, err = jget(tok, json_path_key)
         if err:
             fails.append(err)
             continue
-        if not isinstance(entry, dict) or "light" not in entry or "dark" not in entry:
-            fails.append(f"{json_path_key}: missing 'light'/'dark' keys")
+        if not isinstance(entry, dict) or "value" not in entry:
+            fails.append(f"{json_path_key}: missing 'value' key")
             continue
         css_var = f"--cman-{css_suffix}"
 
-        json_light = normalize(entry["light"])
-        css_light = resolve_text(root_vars, root_vars.get(css_var))
-        if json_light != css_light:
-            fails.append(f"{json_path_key} (light) value drift")
-            diffs.append(f"  {json_path_key} light: json={json_light} css={css_light}")
-
-        json_dark = normalize(entry["dark"])
-        css_dark = resolve_text(dark_context, dark_context.get(css_var))
-        if json_dark != css_dark:
-            fails.append(f"{json_path_key} (dark) value drift")
-            diffs.append(f"  {json_path_key} dark: json={json_dark} css={css_dark}")
+        json_val = normalize(entry["value"])
+        css_val = resolve_text(root_vars, root_vars.get(css_var))
+        if json_val != css_val:
+            fails.append(f"{json_path_key} value drift")
+            diffs.append(f"  {json_path_key}: json={json_val} css={css_val}")
 
     # ---- (b) scalar tokens (theme-invariant) -------------------------------
     for json_path_key, css_suffix in SCALAR_TOKENS:
@@ -280,7 +260,7 @@ def main():
         return 1
 
     print("=== check-tokens.py: OK ===")
-    print(f"  {len(COLOR_TOKENS)} color tokens agree (light + dark) across tokens.css / tokens.json")
+    print(f"  {len(COLOR_TOKENS)} color tokens agree across tokens.css / tokens.json")
     print(f"  {len(SCALAR_TOKENS)} font/radius/spacing tokens agree across tokens.css / tokens.json")
     print("  every var(--cman-*) reference in tailwind.preset.js resolves to tokens.css")
     print(f"  every var(--cman-*) reference in the {len(LIVE_DOC_FILES)} doc files resolves to tokens.css")

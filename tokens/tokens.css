@@ -19,21 +19,21 @@
      frontend/src/styles/global.css                        (real call sites —
        type scale, weights, radius, letter-spacing, spacing mined from here)
 
-   NOTE on the dark-theme accent pair: this rebuild uses jakkaritw's
-   2026-08-15 handoff values (#3fa06e / #5cbf8c) for the dark-theme accent
-   roles. At the time of this rebuild the LIVE app file still showed an
-   older dark-accent pair (#2f7f55 / #227d66) — the handoff record is the
-   authoritative source for this design system either way, so this file
-   follows it, not whatever the live file happens to show mid-edit.
+   NOTE (2026-08-15): this file used to also carry a [data-theme='dark']
+   override block. jakkaritw decided the app ships ONE theme only — light
+   Sea Green — and dark mode was removed entirely the same day: tokens,
+   the toggle, and the docs that promised it. Nothing in this repo branches
+   on theme anymore. See git history before this commit if a dark variant
+   is ever revisited.
    ========================================================================= */
 
 :root {
   /* --- BRAND / SHELL — jakkaritw picked Sea Green #2E8B57 on 2026-08-15,
      over a deeper #1a4e31 that would have kept the old gold accent.
-     --cman-shell and --cman-green hold the SAME value in light theme (the
-     shell IS the primary accent here) but are kept as two tokens because
-     dark theme needs them to diverge (see the dark block below) — a plain
-     near-black shell with a lighter green accent for buttons/links. */
+     --cman-shell and --cman-green hold the SAME value (the shell IS the
+     primary accent here) but stay two separate tokens for the two ROLES
+     they name — page background vs. button/link fill — so a future
+     accent-only change doesn't have to touch the page background too. */
   --cman-shell: #2e8b57; /* page shell / nav / hero background */
   --cman-green: #2e8b57; /* brand accent — primary button fill, links, focus */
   --cman-teal:  #3fa06e; /* hover + lighter step for --cman-green */
@@ -186,46 +186,4 @@
   --cman-space-32: 32px;
   --cman-space-40: 40px;
   --cman-space-48: 48px;
-}
-
-[data-theme='dark'] {
-  --cman-ink:   #f2eee5;
-  --cman-ink-2: #c6c0b2;
-  --cman-ink-3: #8b857a;
-
-  /* Dark theme's shell is near-black — NOT a darker green. Unlike light
-     theme, --cman-shell and --cman-green genuinely diverge here: the shell
-     is the page background, --cman-green is a separate lighter-green
-     accent kept legible for buttons/links against that near-black ground. */
-  --cman-shell: #1c1a16;
-  --cman-green: #3fa06e;
-  --cman-teal:  #5cbf8c;
-
-  --cman-surface-inset: #242019;
-  --cman-surface:       #2a251e;
-
-  --cman-line:   rgba(242, 238, 229, 0.12);
-  --cman-line-2: rgba(242, 238, 229, 0.07);
-
-  --cman-special-bg:   #33280f;
-  --cman-special-edge: #5c4915;
-
-  --cman-status-sap:      #8fa97e;
-  --cman-status-approved: #8098c0;
-  --cman-status-pending:  #f2eee5;
-
-  /* Dark theme's own accent (--cman-green, #3fa06e) is already calibrated
-     for this dark ground, so accent-text/on-shell simply alias to it —
-     the light-theme terracotta/white swap only exists to fix the LIGHT
-     theme's green shell. */
-  --cman-accent-text: var(--cman-green);
-
-  /* Dark theme's shell was already dark before the light-theme Sea Green
-     change — it never had the "green swallows text" problem, so the
-     on-shell roles alias back to dark theme's own already-correct values
-     instead of a second dark-mode palette. */
-  --cman-ink-on-shell:    var(--cman-ink);
-  --cman-ink-on-shell-2:  var(--cman-ink-2);
-  --cman-accent-on-shell: var(--cman-green);
-  --cman-line-on-shell:   var(--cman-line-2);
 }
